@@ -16,7 +16,7 @@ namespace Ddd.Infrastructure
         static ValueType()
         {
             var type = typeof(T);
-            typeProperties = type.GetProperties();
+            typeProperties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             typeName = type.Name;
         }
 
@@ -28,7 +28,7 @@ namespace Ddd.Infrastructure
             if (ReferenceEquals(null, obj)) return false;
             if (obj.GetType() != this.GetType()) return false;
 
-            PropertyInfo[] objProperties = obj.GetType().GetProperties();
+            PropertyInfo[] objProperties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             if (!typeProperties.SequenceEqual(objProperties)) return false;
 
