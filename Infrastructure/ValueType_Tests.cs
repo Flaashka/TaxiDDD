@@ -123,6 +123,13 @@ namespace Ddd.Infrastructure
             Assert.IsFalse(b1 == b2);
             Assert.IsFalse(c1 == c2);
         }
+
+        [Test]
+        public void ToStringUseOnlyPublicInstanceProperties()
+        {
+            Assert.AreEqual("StrangeValue(SomeProperty: 00:00:42)",
+                new StrangeValue(TimeSpan.FromSeconds(42)).ToString());
+        }
 	}
 
 	public class Person : ValueType<Person>
@@ -138,4 +145,15 @@ namespace Ddd.Infrastructure
 			BirthDate = birthDate;
 		}
 	}
+
+    public class StrangeValue : ValueType<StrangeValue>
+    {
+        public static int SomeStaticProperty => 42;
+        public TimeSpan SomeProperty { get; }
+
+        public StrangeValue(TimeSpan someProperty)
+        {
+            SomeProperty = someProperty;
+        }
+    }
 }
