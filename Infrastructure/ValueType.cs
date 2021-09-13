@@ -5,16 +5,6 @@ using System.Reflection;
 
 namespace Ddd.Infrastructure
 {
-    //Все Value-типы, согласно DDD, должны поддерживать семантику значений, то есть сравниваться по содержимому своих свойств.
-    //Каждый раз реализовывать Equals, GetHashCode и ToString соответствующим образом — довольно муторное занятие.
-    //Часто для этого создают базовый класс, наследование от которого реализует нужным образом все эти стандартные методы.
-    //Это вам и предстоит сделать!
-
-    //В рамках этого задания сравнивать Value-типы можно только по значению их публичных свойств, без учета значения полей.
-    //Хотя как правильно это стоит делать на практике — вопрос дискуссионный и, скорее, предмет договорённостей в вашей команде.
-    //В файле Infrastructure/ValueType.cs реализуйте класс ValueType так, чтобы проходили все тесты в файле ValueType_Tests.cs.
-    //После решения этой задачи посмотрите подсказки!
-
     /// <summary>
     /// Базовый класс для всех Value типов.
     /// </summary>
@@ -58,26 +48,30 @@ namespace Ddd.Infrastructure
         {
             unchecked
             {
-                return (ElementwiseHashcode(typeProperties) * 397);
-            }
-        }
+                var propsWithValues = GetPropsWithValues();
 
-        // ReSharper disable once IdentifierTypo
-        private int ElementwiseHashcode<T>(IEnumerable<T> items)
-        {
-            unchecked
-            {
-                return items.Select(t => t.GetHashCode()).Aggregate((res, next) => (res * 379) ^ next);
+                var hash = 42;
+                for (var i = 0; i < propsWithValues.Count; i++)
+                {
+                    hash = hash * 37 + propsWithValues[i].GetHashCode();
+                }
+
+                return hash;
             }
         }
 
         public override string ToString()
         {
-            var propsWithValues = typeProperties
+            return $"{typeName}({string.Join("; ", GetPropsWithValues())})";
+        }
+
+        private List<string> GetPropsWithValues()
+        {
+            return typeProperties
                 .Select(propInfo => Tuple.Create(propInfo.Name, propInfo.GetValue(this)?.ToString()))
                 .OrderBy(tuple => tuple.Item1)
-                .Select(tuple => string.Join(": ", tuple.Item1, tuple.Item2 ?? ""));
-            return $"{typeName}({string.Join("; ", propsWithValues)})";
+                .Select(tuple => string.Join(": ", tuple.Item1, tuple.Item2 ?? ""))
+                .ToList();
         }
     }
 }
