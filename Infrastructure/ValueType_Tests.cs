@@ -107,6 +107,22 @@ namespace Ddd.Infrastructure
 			Assert.AreEqual("Address(Building: Y; Street: X)", new Address("X", "Y").ToString());
 			Assert.AreEqual("Address(Building: ; Street: )", new Address(null, null).ToString());
 		}
+
+        [Test]
+        public void GetHashCodeTest()
+        {
+            var a1 = (new Address("A", null).GetHashCode());
+            var a2 = (new Address("A", null).GetHashCode());
+
+            var b1 = (new Address("C", "A").GetHashCode());
+            var b2 = (new Address("A", "C").GetHashCode());
+
+            var c1 = (new Address("A", "C").GetHashCode());
+            var c2 = (new Address("N", "C").GetHashCode());
+            Assert.IsTrue(a1 == a2);
+            Assert.IsFalse(b1 == b2);
+            Assert.IsFalse(c1 == c2);
+        }
 	}
 
 	public class Person : ValueType<Person>
