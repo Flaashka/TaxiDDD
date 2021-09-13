@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -19,11 +20,14 @@ namespace Ddd.Infrastructure
     /// </summary>
     public class ValueType<T> where T : class
     {
-        private static readonly PropertyInfo[] properties;
+        private static readonly PropertyInfo[] typeProperties;
+        private static readonly string typeName;
 
         static ValueType()
         {
-            properties = typeof(T).GetProperties();
+            var type = typeof(T);
+            typeProperties = type.GetProperties();
+            typeName = type.Name;
         }
 
         public override bool Equals(object obj) => Equals(obj as T);
@@ -36,11 +40,11 @@ namespace Ddd.Infrastructure
 
             PropertyInfo[] objProperties = obj.GetType().GetProperties();
 
-            if (!properties.SequenceEqual(objProperties)) return false;
+            if (!typeProperties.SequenceEqual(objProperties)) return false;
 
-            for (var i = 0; i < properties.Length; i++)
+            for (var i = 0; i < typeProperties.Length; i++)
             {
-                var selfValue = properties[i].GetValue(this);
+                var selfValue = typeProperties[i].GetValue(this);
                 var objValue = objProperties[i].GetValue(obj);
 
                 if (!object.Equals(selfValue, objValue))
@@ -54,16 +58,26 @@ namespace Ddd.Infrastructure
         {
             unchecked
             {
-                return (ElementwiseHashcode(properties) * 397);
+                return (ElementwiseHashcode(typeProperties) * 397);
             }
         }
 
+        // ReSharper disable once IdentifierTypo
         private int ElementwiseHashcode<T>(IEnumerable<T> items)
         {
             unchecked
             {
                 return items.Select(t => t.GetHashCode()).Aggregate((res, next) => (res * 379) ^ next);
             }
+        }
+
+        public override string ToString()
+        {
+            var propsWithValues = typeProperties
+                .Select(propInfo => Tuple.Create(propInfo.Name, propInfo.GetValue(this)?.ToString()))
+                .OrderBy(tuple => tuple.Item1)
+                .Select(tuple => string.Join(": ", tuple.Item1, tuple.Item2 ?? ""));
+            return $"{typeName}({string.Join("; ", propsWithValues)})";
         }
     }
 }
