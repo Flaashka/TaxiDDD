@@ -5,6 +5,9 @@ using System;
 // ReSharper disable IdentifierTypo
 namespace Ddd.Taxi.Domain
 {
+	//Проверьте, не осталось ли у вас методов, которые принимают 
+	//отдельные поля объектов в случае, когда можно было бы передать сам объект
+	
     public class TaxiOrder : Entity<int>
     {
         public TaxiOrder(int taxiOrderId) : base(taxiOrderId) { }
