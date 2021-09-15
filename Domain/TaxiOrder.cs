@@ -26,7 +26,7 @@ namespace Ddd.Taxi.Domain
         }
 
 		public Address DestinationAddress { get; private set; }
-        public void SetDestinationAddress(string destinationStreet, string destinationBuilding)
+        private void SetDestinationAddress(string destinationStreet, string destinationBuilding)
         {
             DestinationAddress = new Address(destinationStreet, destinationBuilding);
         }
@@ -39,23 +39,8 @@ namespace Ddd.Taxi.Domain
         }
 
 
-        public void AssignDriver(string firstName, string lastName, string carColor, string carModel, string carPlateNumber, DateTime driverAssignmentTime, int driverId = default(int))
-        {
-            SetDriver(firstName, lastName, carColor, carModel, carPlateNumber, driverId);
-            SetDriverAssignmentTime(driverAssignmentTime);
-            SetTaxiOrderStatus(TaxiOrderStatus.WaitingCarArrival);
-        }
-
-
-
-
-
-
-
-
-
         public TaxiOrderStatus Status { get; private set; }
-        public void SetTaxiOrderStatus(TaxiOrderStatus status)
+        private void SetTaxiOrderStatus(TaxiOrderStatus status)
         {
             Status = status;
         }
@@ -69,7 +54,7 @@ namespace Ddd.Taxi.Domain
 
 
         public DateTime DriverAssignmentTime { get; private set; }
-        public void SetDriverAssignmentTime(DateTime driverAssignmentTime)
+        private void SetDriverAssignmentTime(DateTime driverAssignmentTime)
         {
             DriverAssignmentTime = driverAssignmentTime;
         }
@@ -109,8 +94,18 @@ namespace Ddd.Taxi.Domain
         //}
 
 
+        public void AssignDriver(string firstName, string lastName, string carColor, string carModel, string carPlateNumber, DateTime driverAssignmentTime, int driverId = default(int))
+        {
+            SetDriver(firstName, lastName, carColor, carModel, carPlateNumber, driverId);
+            SetDriverAssignmentTime(driverAssignmentTime);
+            SetTaxiOrderStatus(TaxiOrderStatus.WaitingCarArrival);
+        }
+
         public void UnassignDriver()
         {
+            if (Driver == null)
+                throw new InvalidOperationException("WaitingForDriver");
+
             SetDriver(null, null, null, null, null);
             SetTaxiOrderStatus(TaxiOrderStatus.WaitingForDriver);
         }
