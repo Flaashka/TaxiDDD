@@ -1,43 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-// ReSharper disable IdentifierTypo
+﻿using Ddd.Infrastructure;
+using System;
 
+// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
 namespace Ddd.Taxi.Domain
 {
-	//типичная анемичная модель
-	public class TaxiOrder
-	{
-        public int Id { get; private set; }
-        public void SetTaxiOrderId(int taxiOrderId)
-        {
-            Id = taxiOrderId;
-        }
+    public class TaxiOrder : Entity<int>
+    {
+        public TaxiOrder(int taxiOrderId) : base(taxiOrderId) { }
 
         public Client Client { get; private set; }
-		public void SetClient(string firstName, string lastName, int clientId = default(int))
+		private void SetClient(string firstName, string lastName, int clientId = default(int))
         {
             Client = new Client(firstName, lastName, clientId);
         }
+        public PersonName ClientName => Client == null ? throw new InvalidOperationException() : Client.ClientName;
 
         public Address StartAddress { get; private set; }
-        public void SetStartAddress(string startStreet, string startBuilding)
+        private void SetStartAddress(string startStreet, string startBuilding)
         {
             StartAddress = new Address(startStreet, startBuilding);
         }
+        public Address Start => StartAddress;
 
-		public Address DestinationAddress { get; private set; }
+        public Address DestinationAddress { get; private set; }
         private void SetDestinationAddress(string destinationStreet, string destinationBuilding)
         {
             DestinationAddress = new Address(destinationStreet, destinationBuilding);
         }
+        public Address Destination => DestinationAddress;
 
         public Driver Driver { get; private set; }
-        private void SetDriver(string firstName, string lastName, string carColor, string carModel, string carPlateNumber, int driverId = default(int))
+        private void SetDriver(Driver driver)
         {
-            Driver = new Driver(firstName, lastName, driverId);
-            Driver.SetCar(carColor, carModel, carPlateNumber);
+            Driver = driver;
         }
-
 
         public TaxiOrderStatus Status { get; private set; }
         private void SetTaxiOrderStatus(TaxiOrderStatus status)
@@ -45,13 +42,11 @@ namespace Ddd.Taxi.Domain
             Status = status;
         }
 
-
         public DateTime CreationTime { get; private set; }
-        public void SetCreationTime(DateTime creationTime)
+        private void SetCreationTime(DateTime creationTime)
         {
             CreationTime = creationTime;
         }
-
 
         public DateTime DriverAssignmentTime { get; private set; }
         private void SetDriverAssignmentTime(DateTime driverAssignmentTime)
@@ -59,44 +54,36 @@ namespace Ddd.Taxi.Domain
             DriverAssignmentTime = driverAssignmentTime;
         }
 
-
         public DateTime CancelTime { get; private set; }
-        public void SetCancelTime(DateTime cancelTime)
+        private void SetCancelTime(DateTime cancelTime)
         {
             CancelTime = cancelTime;
         }
 
-
         public DateTime StartRideTime { get; private set; }
-        public void SetStartRideTime(DateTime startRideTime)
+        private void SetStartRideTime(DateTime startRideTime)
         {
             StartRideTime = startRideTime;
         }
 
-
         public DateTime FinishRideTime { get; private set; }
-        public void SetFinishRideTime(DateTime finishRideTime)
+        private void SetFinishRideTime(DateTime finishRideTime)
         {
             FinishRideTime = finishRideTime;
         }
 
-
-        //public TaxiOrder CreateOrderWithoutDestination(string firstName, string lastName, string street,
-        //    string building, DateTime creationTime, int taxiOrderId)
-        //{
-        //    var taxiOrder = new TaxiOrder();
-        //    SetTaxiOrderId(taxiOrderId);
-        //    SetClient(firstName, lastName);
-        //    SetStartAddress(street, building);
-        //    SetCreationTime(creationTime);
-
-        //    return taxiOrder;
-        //}
-
-
-        public void AssignDriver(string firstName, string lastName, string carColor, string carModel, string carPlateNumber, DateTime driverAssignmentTime, int driverId = default(int))
+        public void CreateOrderWithoutDestination(string firstName, string lastName, string street,
+            string building, DateTime creationTime)
         {
-            SetDriver(firstName, lastName, carColor, carModel, carPlateNumber, driverId);
+            SetClient(firstName, lastName);
+            SetStartAddress(street, building);
+            SetCreationTime(creationTime);
+        }
+
+        #region Driver
+        public void AssignDriver(Driver driver, DateTime driverAssignmentTime)
+        {
+            SetDriver(driver);
             SetDriverAssignmentTime(driverAssignmentTime);
             SetTaxiOrderStatus(TaxiOrderStatus.WaitingCarArrival);
         }
@@ -106,8 +93,28 @@ namespace Ddd.Taxi.Domain
             if (Driver == null)
                 throw new InvalidOperationException("WaitingForDriver");
 
-            SetDriver(null, null, null, null, null);
+            SetDriver(null);
             SetTaxiOrderStatus(TaxiOrderStatus.WaitingForDriver);
+        }
+
+        #endregion
+
+
+        #region Destination
+        public void UpdateDestination(string street, string building)
+        {
+            SetDestinationAddress(street, building);
+        }
+
+        #endregion
+
+
+        #region Ride
+
+        public void StartRide(DateTime startRideTime)
+        {
+            SetTaxiOrderStatus(TaxiOrderStatus.InProgress);
+            SetStartRideTime(startRideTime);
         }
 
         public void Cancel(DateTime cancelTime)
@@ -116,21 +123,12 @@ namespace Ddd.Taxi.Domain
             SetCancelTime(cancelTime);
         }
 
-        public void UpdateDestination(string street, string building)
-        {
-            SetDestinationAddress(street, building);
-        }
-
-        public void StartRide(DateTime startRideTime)
-        {
-            SetTaxiOrderStatus(TaxiOrderStatus.InProgress);
-            SetStartRideTime(startRideTime);
-        }
-
         public void FinishRide(DateTime finishRideTime)
         {
             SetTaxiOrderStatus(TaxiOrderStatus.Finished);
             SetFinishRideTime(finishRideTime);
         }
+
+        #endregion
     }
 }

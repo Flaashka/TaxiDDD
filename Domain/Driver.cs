@@ -8,6 +8,12 @@
             DriverId = driverId;
         }
 
+        public Driver(string firstName, string lastName, string carColor, string carModel,
+            string carPlateNumber, int driverId = default(int)) : this(firstName, lastName, driverId)
+        {
+            SetCar(carColor, carModel, carPlateNumber);
+        }
+
         public int DriverId { get; }
         public PersonName DriverName { get; }
         public Car Car { get; private set; }

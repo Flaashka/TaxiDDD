@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-// ReSharper disable IdentifierTypo
 
+// ReSharper disable InconsistentNaming
+// ReSharper disable IdentifierTypo
+// ReSharper disable CheckNamespace
 namespace Ddd.Taxi.Domain
 {
     public class TaxiApi : ITaxiApi<TaxiOrder>
@@ -19,11 +21,8 @@ namespace Ddd.Taxi.Domain
 
         public TaxiOrder CreateOrderWithoutDestination(string firstName, string lastName, string street, string building)
         {
-            var taxiOrder = new TaxiOrder();
-            taxiOrder.SetTaxiOrderId(idCounter++);
-            taxiOrder.SetClient(firstName, lastName);
-            taxiOrder.SetStartAddress(street, building);
-            taxiOrder.SetCreationTime(currentTime());
+            var taxiOrder = new TaxiOrder(idCounter++);
+            taxiOrder.CreateOrderWithoutDestination(firstName, lastName, street, building, currentTime());
 
             return taxiOrder;
         }
@@ -35,8 +34,9 @@ namespace Ddd.Taxi.Domain
 
         public void AssignDriver(TaxiOrder order, int driverId)
         {
-            driversRepo.FillDriverToOrder(driverId, order, currentTime());
-            //order.AssignDriver();
+            var driver = driversRepo.GetDriverById(driverId);
+
+            order.AssignDriver(driver, currentTime());
         }
 
         public void UnassignDriver(TaxiOrder order)
