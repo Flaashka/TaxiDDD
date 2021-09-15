@@ -19,7 +19,10 @@ namespace Ddd.Taxi.Domain
             var carColor = "Baklazhan";
             var carPlateNumber = "A123BT 66";
 
-            return new Driver(driverFirstName, driverLastName, carColor, carModel, carPlateNumber, driverId);
+            var driverName = new PersonName(driverFirstName, driverLastName);
+            var car = new Car(carColor, carModel, carPlateNumber);
+
+            return new Driver(driverName, car, driverId);
         }
     }
 }

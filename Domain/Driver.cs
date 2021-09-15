@@ -4,16 +4,11 @@ namespace Ddd.Taxi.Domain
 {
     public class Driver : Entity<int>
     {
-        public Driver(string firstName, string lastName, int driverId = default(int)) : base(driverId)
+        public Driver(PersonName driverName, Car car, int driverId = default(int)) : base(driverId)
         {
-            DriverName = new PersonName(firstName, lastName);
+            DriverName = driverName;
+            SetCar(car);
             DriverId = driverId;
-        }
-
-        public Driver(string firstName, string lastName, string carColor, string carModel,
-            string carPlateNumber, int driverId = default(int)) : this(firstName, lastName, driverId)
-        {
-            SetCar(carColor, carModel, carPlateNumber);
         }
 
         public int DriverId { get; }
@@ -23,6 +18,10 @@ namespace Ddd.Taxi.Domain
         public void SetCar(string carColor, string carModel, string carPlateNumber)
         {
             Car = new Car(carColor, carModel, carPlateNumber);
+        }
+        public void SetCar(Car car)
+        {
+            Car = car;
         }
     }
 }
