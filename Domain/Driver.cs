@@ -1,8 +1,10 @@
-﻿namespace Ddd.Taxi.Domain
+﻿using Ddd.Infrastructure;
+
+namespace Ddd.Taxi.Domain
 {
-    public class Driver
+    public class Driver : Entity<int>
     {
-        public Driver(string firstName, string lastName, int driverId = default(int))
+        public Driver(string firstName, string lastName, int driverId = default(int)) : base(driverId)
         {
             DriverName = new PersonName(firstName, lastName);
             DriverId = driverId;
