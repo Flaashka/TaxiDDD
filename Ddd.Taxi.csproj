@@ -50,8 +50,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\DriversRepository.cs" />
     <Compile Include="Domain\ObjectModelAssertionExtensions.cs" />
     <Compile Include="Domain\ITaxiApi.cs" />
+    <Compile Include="Domain\TaxiApi.cs" />
     <Compile Include="Domain\TaxiOrderStatus.cs" />
     <Compile Include="Domain\TaxiOrder_Should.cs" />
     <Compile Include="Domain\Address.cs" />
