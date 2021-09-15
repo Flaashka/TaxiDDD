@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+// ReSharper disable IdentifierTypo
 
 namespace Ddd.Taxi.Domain
 {
@@ -18,50 +19,40 @@ namespace Ddd.Taxi.Domain
 
         public TaxiOrder CreateOrderWithoutDestination(string firstName, string lastName, string street, string building)
         {
-            return
-                new TaxiOrder
-                {
-                    Id = idCounter++,
-                    ClientFirstName = firstName,
-                    ClientLastName = lastName,
-                    StartStreet = street,
-                    StartBuilding = building,
-                    CreationTime = currentTime()
-                };
+            var taxiOrder = new TaxiOrder();
+            taxiOrder.SetTaxiOrderId(idCounter++);
+            taxiOrder.SetClient(firstName, lastName);
+            taxiOrder.SetStartAddress(street, building);
+            taxiOrder.SetCreationTime(currentTime());
+
+            return taxiOrder;
         }
 
         public void UpdateDestination(TaxiOrder order, string street, string building)
         {
-            order.DestinationStreet = street;
-            order.DestinationBuilding = building;
+            order.UpdateDestination(street, building);
         }
 
         public void AssignDriver(TaxiOrder order, int driverId)
         {
-            driversRepo.FillDriverToOrder(driverId, order);
-            order.DriverAssignmentTime = currentTime();
-            order.Status = TaxiOrderStatus.WaitingCarArrival;
+            driversRepo.FillDriverToOrder(driverId, order, currentTime());
+            //order.AssignDriver();
         }
 
         public void UnassignDriver(TaxiOrder order)
         {
-            order.DriverFirstName = null;
-            order.DriverLastName = null;
-            order.CarModel = null;
-            order.CarColor = null;
-            order.CarPlateNumber = null;
-            order.Status = TaxiOrderStatus.WaitingForDriver;
+            order.UnassignDriver();
         }
 
         public string GetDriverFullInfo(TaxiOrder order)
         {
             if (order.Status == TaxiOrderStatus.WaitingForDriver) return null;
             return string.Join(" ",
-                "Id: " + order.DriverId,
-                "DriverName: " + FormatName(order.DriverFirstName, order.DriverLastName),
-                "Color: " + order.CarColor,
-                "CarModel: " + order.CarModel,
-                "PlateNumber: " + order.CarPlateNumber);
+                "Id: " + order.Driver?.DriverId,
+                "DriverName: " + FormatName(order.Driver?.DriverName?.FirstName, order.Driver?.DriverName?.LastName),
+                "Color: " + order.Driver?.Car?.CarColor,
+                "CarModel: " + order.Driver?.Car?.CarModel,
+                "PlateNumber: " + order.Driver?.Car?.CarPlateNumber);
         }
 
         public string GetShortOrderInfo(TaxiOrder order)
@@ -69,10 +60,10 @@ namespace Ddd.Taxi.Domain
             return string.Join(" ",
                 "OrderId: " + order.Id,
                 "Status: " + order.Status,
-                "Client: " + FormatName(order.ClientFirstName, order.ClientLastName),
-                "Driver: " + FormatName(order.DriverFirstName, order.DriverLastName),
-                "From: " + FormatAddress(order.StartStreet, order.StartBuilding),
-                "To: " + FormatAddress(order.DestinationStreet, order.DestinationBuilding),
+                "Client: " + FormatName(order.Client.ClientName.FirstName, order.Client.ClientName.LastName),
+                "Driver: " + FormatName(order.Driver?.DriverName?.FirstName, order.Driver?.DriverName?.LastName),
+                "From: " + FormatAddress(order.StartAddress.Street, order.StartAddress.Building),
+                "To: " + FormatAddress(order.DestinationAddress?.Street, order.DestinationAddress?.Building),
                 "LastProgressTime: " + GetLastProgressTime(order).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         }
 
@@ -98,20 +89,17 @@ namespace Ddd.Taxi.Domain
 
         public void Cancel(TaxiOrder order)
         {
-            order.Status = TaxiOrderStatus.Canceled;
-            order.CancelTime = currentTime();
+            order.Cancel(currentTime());
         }
 
         public void StartRide(TaxiOrder order)
         {
-            order.Status = TaxiOrderStatus.InProgress;
-            order.StartRideTime = currentTime();
+            order.StartRide(currentTime());
         }
 
         public void FinishRide(TaxiOrder order)
         {
-            order.Status = TaxiOrderStatus.Finished;
-            order.FinishRideTime = currentTime();
+            order.FinishRide(currentTime());
         }
     }
 }

@@ -25,12 +25,16 @@ namespace Ddd.Taxi.Domain
 			var order = taxiApi.CreateOrderWithoutDestination("John", "Doe", "Street1", "building1");
 			time = new DateTime(2017, 1, 2);
 			taxiApi.AssignDriver(order, 15);
+
+            var shortOrderInfo = taxiApi.GetShortOrderInfo(order);
+            var driverFullInfo = taxiApi.GetDriverFullInfo(order);
+
 			Assert.AreEqual(
 				"OrderId: 0 Status: WaitingCarArrival Client: John Doe Driver: Drive Driverson From: Street1 building1 To:  LastProgressTime: 2017-01-02 00:00:00",
-				taxiApi.GetShortOrderInfo(order));
+                shortOrderInfo);
 			Assert.AreEqual(
 				"Id: 15 DriverName: Drive Driverson Color: Baklazhan CarModel: Lada sedan PlateNumber: A123BT 66",
-				taxiApi.GetDriverFullInfo(order));
+                driverFullInfo);
 		}
 
 		[Test]
@@ -76,9 +80,12 @@ namespace Ddd.Taxi.Domain
 			taxiApi.StartRide(order);
 			time = new DateTime(2017, 01, 20);
 			taxiApi.FinishRide(order);
+
+            var shortOrderInfo = taxiApi.GetShortOrderInfo(order);
+
 			Assert.AreEqual(
 				"OrderId: 0 Status: Finished Client: John Doe Driver: Drive Driverson From: Street1 building1 To: far far away 42 LastProgressTime: 2017-01-20 00:00:00",
-				taxiApi.GetShortOrderInfo(order));
+                shortOrderInfo);
 		}
 
 		[Test]

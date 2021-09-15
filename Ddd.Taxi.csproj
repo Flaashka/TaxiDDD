@@ -50,6 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\Car.cs" />
+    <Compile Include="Domain\Client.cs" />
+    <Compile Include="Domain\Driver.cs" />
     <Compile Include="Domain\DriversRepository.cs" />
     <Compile Include="Domain\ObjectModelAssertionExtensions.cs" />
     <Compile Include="Domain\ITaxiApi.cs" />
