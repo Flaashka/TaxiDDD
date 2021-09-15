@@ -29,7 +29,7 @@ namespace Ddd.Taxi.Domain
 
         public void UpdateDestination(TaxiOrder order, string street, string building)
         {
-            order.UpdateDestination(street, building);
+            order.UpdateDestination(new Address(street, building));
         }
 
         public void AssignDriver(TaxiOrder order, int driverId)

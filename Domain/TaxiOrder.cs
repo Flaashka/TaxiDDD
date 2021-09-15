@@ -17,16 +17,16 @@ namespace Ddd.Taxi.Domain
         public PersonName ClientName => Client == null ? throw new InvalidOperationException() : Client.ClientName;
 
         public Address StartAddress { get; private set; }
-        private void SetStartAddress(string startStreet, string startBuilding)
+        private void SetStartAddress(Address startAddress)
         {
-            StartAddress = new Address(startStreet, startBuilding);
+            StartAddress = startAddress;
         }
         public Address Start => StartAddress;
 
         public Address DestinationAddress { get; private set; }
-        private void SetDestinationAddress(string destinationStreet, string destinationBuilding)
+        private void SetDestinationAddress(Address destinationAddress)
         {
-            DestinationAddress = new Address(destinationStreet, destinationBuilding);
+            DestinationAddress = destinationAddress;
         }
         public Address Destination => DestinationAddress;
 
@@ -76,13 +76,16 @@ namespace Ddd.Taxi.Domain
             string building, DateTime creationTime)
         {
             SetClient(firstName, lastName);
-            SetStartAddress(street, building);
+            SetStartAddress(new Address(street, building));
             SetCreationTime(creationTime);
         }
 
         #region Driver
         public void AssignDriver(Driver driver, DateTime driverAssignmentTime)
         {
+            if (Driver != null)
+                throw new InvalidOperationException();
+
             SetDriver(driver);
             SetDriverAssignmentTime(driverAssignmentTime);
             SetTaxiOrderStatus(TaxiOrderStatus.WaitingCarArrival);
@@ -92,6 +95,8 @@ namespace Ddd.Taxi.Domain
         {
             if (Driver == null)
                 throw new InvalidOperationException("WaitingForDriver");
+            if (Status != TaxiOrderStatus.WaitingCarArrival)
+                throw new InvalidOperationException();
 
             SetDriver(null);
             SetTaxiOrderStatus(TaxiOrderStatus.WaitingForDriver);
@@ -101,9 +106,9 @@ namespace Ddd.Taxi.Domain
 
 
         #region Destination
-        public void UpdateDestination(string street, string building)
+        public void UpdateDestination(Address destinationAddress)
         {
-            SetDestinationAddress(street, building);
+            SetDestinationAddress(destinationAddress);
         }
 
         #endregion
@@ -113,18 +118,27 @@ namespace Ddd.Taxi.Domain
 
         public void StartRide(DateTime startRideTime)
         {
+            if (Status != TaxiOrderStatus.WaitingCarArrival)
+                throw new InvalidOperationException();
+
             SetTaxiOrderStatus(TaxiOrderStatus.InProgress);
             SetStartRideTime(startRideTime);
         }
 
         public void Cancel(DateTime cancelTime)
         {
+            if (Status != TaxiOrderStatus.WaitingCarArrival && Status != TaxiOrderStatus.WaitingForDriver)
+                throw new InvalidOperationException();
+
             SetTaxiOrderStatus(TaxiOrderStatus.Canceled);
             SetCancelTime(cancelTime);
         }
 
         public void FinishRide(DateTime finishRideTime)
         {
+            if (Status != TaxiOrderStatus.InProgress)
+                throw new InvalidOperationException();
+
             SetTaxiOrderStatus(TaxiOrderStatus.Finished);
             SetFinishRideTime(finishRideTime);
         }
